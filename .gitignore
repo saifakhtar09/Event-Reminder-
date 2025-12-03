@@ -1,0 +1,13 @@
+# Root Ignore
+node_modules/
+.env
+
+# Frontend
+dist/
+
+# Backend
+project/backend/node_modules/
+project/backend/.env
+
+# Logs
+*.log
