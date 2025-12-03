@@ -1,3 +1,4 @@
+cd "C:\Event Reminder App\project"
 ## Features
 
 - JWT-based authentication
