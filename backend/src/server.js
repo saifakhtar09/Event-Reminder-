@@ -12,10 +12,13 @@ dotenv.config();
 const app = express();
 
 // CORS
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  credentials: true
-}));
+// CORS - Allow all origins for now
+   app.use(cors({
+     origin: '*',
+     credentials: false,
+     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+     allowedHeaders: ['Content-Type', 'Authorization']
+   }));c
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
