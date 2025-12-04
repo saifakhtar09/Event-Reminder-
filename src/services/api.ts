@@ -1,6 +1,12 @@
 import axios, { AxiosError } from 'axios';
 
+// Use environment variable with fallback (only for development)
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+// Validate API URL in production
+if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+  console.warn('⚠️ VITE_API_URL not set in production. Requests may fail.');
+}
 
 console.log('API URL:', API_URL);
 
@@ -11,7 +17,7 @@ const apiClient = axios.create({
   },
 });
 
-// Add token to all requests
+// Request interceptor - Add token to all requests
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -19,24 +25,35 @@ apiClient.interceptors.request.use((config) => {
     console.log('Token attached to request');
   }
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
-// Handle responses
+// Response interceptor - Handle responses and errors
 apiClient.interceptors.response.use(
   (response) => {
-    console.log('API Response:', response.config.url);
-    console.log('Response data:', JSON.stringify(response.data, null, 2));
+    console.log('API Response:', response.config.url, response.status);
     return response;
   },
   (error: AxiosError) => {
-    console.error('API Error:', error.response?.status, error.response?.data);
+    const status = error.response?.status;
+    const data = error.response?.data;
     
-    if (error.response?.status === 401) {
-      console.log('Unauthorized - clearing token');
+    console.error('API Error:', status, data);
+    
+    // Handle unauthorized access
+    if (status === 401) {
+      console.log('Unauthorized - clearing token and redirecting to login');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    
+    // Handle server errors
+    if (status === 500) {
+      console.error('Server error - please try again later');
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -44,40 +61,43 @@ apiClient.interceptors.response.use(
 // Auth APIs
 export const authAPI = {
   login: (email: string, password: string) => {
-    console.log('Login request:', email);
     return apiClient.post('/auth/login', { email, password });
   },
   
   signup: (email: string, password: string, name: string) => {
-    console.log('Signup request:', email, name);
     return apiClient.post('/auth/signup', { email, password, name });
   },
   
   verifyToken: () => {
-    console.log('Verify token request');
     return apiClient.get('/auth/verify');
+  },
+  
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    return Promise.resolve();
   },
 };
 
 // Event APIs
 export const eventAPI = {
   getAll: () => {
-    console.log('Get all events request');
     return apiClient.get('/events');
   },
   
+  getById: (id: string) => {
+    return apiClient.get(`/events/${id}`);
+  },
+  
   create: (title: string, dateTime: string, image?: string) => {
-    console.log('Create event request:', title, dateTime, image);
     return apiClient.post('/events', { title, dateTime, image });
   },
   
-  update: (id: string, updates: any) => {
-    console.log('Update event request:', id, updates);
+  update: (id: string, updates: Record<string, any>) => {
     return apiClient.put(`/events/${id}`, updates);
   },
   
   delete: (id: string) => {
-    console.log('Delete event request:', id);
     return apiClient.delete(`/events/${id}`);
   },
 };
