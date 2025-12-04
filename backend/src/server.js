@@ -18,7 +18,7 @@ const app = express();
      credentials: false,
      methods: ['GET', 'POST', 'PUT', 'DELETE'],
      allowedHeaders: ['Content-Type', 'Authorization']
-   }));c
+   }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
