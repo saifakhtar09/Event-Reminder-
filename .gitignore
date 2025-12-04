@@ -11,3 +11,6 @@ project/backend/.env
 
 # Logs
 *.log
+
+# .env files    
+echo ".env" >> .gitignore
