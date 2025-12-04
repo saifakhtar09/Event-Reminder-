@@ -11,14 +11,13 @@ dotenv.config();
 
 const app = express();
 
-// CORS
-// CORS - Allow all origins for now
-   app.use(cors({
-     origin: '*',
-     credentials: false,
-     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-     allowedHeaders: ['Content-Type', 'Authorization']
-   }));
+// CORS - Allow all origins for testing
+app.use(cors({
+  origin: '*',
+  credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -65,4 +64,4 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-export default app;  // <-- Required for serverless
+export default app;
