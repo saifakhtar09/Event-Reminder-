@@ -6,26 +6,25 @@ import authRoutes from './routes/authRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { startReminderScheduler, updateEventStatuses } from './services/reminderService.js';
 
 dotenv.config();
 
 const app = express();
 
-// CORS Configuration
+// CORS
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN || '*',
   credentials: true
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Default route
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Event Reminder API',
-    version: '1.0.0',
+    message: 'Event Reminder API Live 🚀',
     endpoints: {
       auth: '/api/auth',
       events: '/api/events',
@@ -34,6 +33,7 @@ app.get('/', (req, res) => {
   });
 });
 
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/notifications', notificationRoutes);
@@ -48,22 +48,18 @@ app.use((req, res) => {
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-
-const startServer = async () => {
-  try {
-    await connectDB();
-
+// 🚨 IMPORTANT — Do NOT listen here when deploying to Vercel
+if (process.env.NODE_ENV !== "production") {
+  import('./services/reminderService.js').then(({ startReminderScheduler, updateEventStatuses }) => {
     startReminderScheduler();
     updateEventStatuses();
+  });
 
-    app.listen(PORT, () => {
-      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-};
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, async () => {
+    await connectDB();
+    console.log(`Server running on ${PORT}`);
+  });
+}
 
-startServer();
+export default app;  // <-- Required for serverless
