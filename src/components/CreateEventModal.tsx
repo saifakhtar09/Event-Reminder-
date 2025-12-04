@@ -8,6 +8,7 @@ interface CreateEventModalProps {
   onClose: () => void;
 }
 
+
 export default function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
   const [title, setTitle] = useState('');
   const [dateTime, setDateTime] = useState('');
@@ -27,9 +28,11 @@ export default function CreateEventModal({ isOpen, onClose }: CreateEventModalPr
       }
       if (!dateTime) {
         throw new Error('Date and time is required');
+      
       }
 
       await addEvent({
+
         title,
         dateTime: new Date(dateTime).toISOString(),
         image: image || undefined
@@ -39,6 +42,7 @@ export default function CreateEventModal({ isOpen, onClose }: CreateEventModalPr
       setDateTime('');
       setImage('');
       onClose();
+
     } catch (err: any) {
       setError(err.message || 'Failed to create event');
     } finally {
@@ -47,6 +51,7 @@ export default function CreateEventModal({ isOpen, onClose }: CreateEventModalPr
   };
 
   return (
+
     <AnimatePresence>
       {isOpen && (
         <>
@@ -60,6 +65,7 @@ export default function CreateEventModal({ isOpen, onClose }: CreateEventModalPr
 
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
+
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -75,6 +81,7 @@ export default function CreateEventModal({ isOpen, onClose }: CreateEventModalPr
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
                 >
                   <X className="w-6 h-6 text-gray-600" />
+                  
                 </motion.button>
               </div>
 
