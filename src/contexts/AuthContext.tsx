@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authAPI } from '../services/api';
+import { useEvents } from './EventContext'; // <-- import EventContext hook
 
 interface User {
   id: string;
@@ -21,6 +22,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Use refetchEvents from EventContext
+  const { refetchEvents } = useEvents();
+
   // Check if user is already logged in on mount
   useEffect(() => {
     const verifyToken = async () => {
@@ -32,6 +36,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await authAPI.verifyToken();
           setUser(JSON.parse(storedUser));
           console.log('Token verified, user loaded:', JSON.parse(storedUser));
+          
+          // Fetch events after token verification
+          await refetchEvents();
         } catch (error) {
           console.error('Token verification failed:', error);
           localStorage.removeItem('token');
@@ -49,11 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authAPI.login(email, password);
       const { token, user } = response.data;
-      
+
       console.log('Login successful:', user);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
+
+      // Fetch events immediately after login
+      await refetchEvents();
     } catch (error: any) {
       const message = error.response?.data?.message || 'Login failed';
       console.error('Login error:', message);
@@ -65,11 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authAPI.signup(email, password, name);
       const { token, user } = response.data;
-      
+
       console.log('Signup successful:', user);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
+
+      // Fetch events immediately after signup
+      await refetchEvents();
     } catch (error: any) {
       const message = error.response?.data?.message || 'Signup failed';
       console.error('Signup error:', message);
@@ -93,8 +106,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }

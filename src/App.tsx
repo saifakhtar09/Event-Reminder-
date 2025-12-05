@@ -10,8 +10,9 @@ import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
-    <AuthProvider>
-      <EventProvider>
+    // EventProvider should be outermost if AuthProvider uses useEvents
+    <EventProvider>
+      <AuthProvider>
         <Router>
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
@@ -36,8 +37,8 @@ function App() {
           </Routes>
           <NotificationSetup />
         </Router>
-      </EventProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </EventProvider>
   );
 }
 

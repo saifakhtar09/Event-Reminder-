@@ -43,10 +43,11 @@ apiClient.interceptors.response.use(
     
     // Handle unauthorized access
     if (status === 401) {
-      console.log('Unauthorized - clearing token and redirecting to login');
+      console.log('Unauthorized - clearing token');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Temporarily disabled for debugging
+      // window.location.href = '/login';
     }
     
     // Handle server errors

@@ -39,6 +39,6 @@ export const protect = async (req, res, next) => {
     return res.status(401).json({
       success: false,
       message: 'Not authorized to access this route'
-    });
+    });  c
   }
 };
